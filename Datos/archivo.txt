@@ -1,38 +1,5 @@
-package main
-
-import "fmt"
-
 func main() {
-    var nombre string
-    var edad int
-    var aprobado bool
-    var promedio float64
-    var resultado float64
-    var calificacionFinal int
-
-    nombre = "Marco"
-    edad = "20"                // ❌ ERROR SEMÁNTICO: asignación de string a variable int
-    aprobado = true
-    promedio = 8.5
-
-    fmt.Println("Nombre:", nombre)
-    fmt.Println("Edad:", edad)
-    fmt.Println("Promedio:", promedio)
-    fmt.Println("Aprobado:", aprobado)
-
-    resultado = calcularPromedio(promedio, 9.0)
-    fmt.Println("Resultado:", resultado)
-
-    fmt.Println(calificacionFinal)
-
-    if aprobado {
-        fmt.Println(nombre, "está aprobado")
-    } else {
-        fmt.Println(nombre, "no está aprobado")
-    }
-
-    calificacionFinal = promedio + aprobado  // ❌ ERROR SEMÁNTICO: operación entre float64 y bool
+    a := 1 + 2 * 3 - 4 / 2
+    b := (1 + 2) * (3 - 1)
+    c := a + b * 2 - 1
 }
-
-}
-
