@@ -10,11 +10,18 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
+import java.util.regex.Matcher;    
 import java.util.regex.Pattern;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
+
+import java.util.*;
+import java.util.Stack;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -100,6 +107,8 @@ public class Principal extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         jTPCompilado2 = new javax.swing.JTextArea();
         labelCaja2 = new javax.swing.JLabel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        jTPCompilado3 = new javax.swing.JTextArea();
 
         jTPCompilado.setColumns(20);
         jTPCompilado.setRows(5);
@@ -219,6 +228,10 @@ public class Principal extends javax.swing.JFrame {
 
         labelCaja2.setText("Programa ");
 
+        jTPCompilado3.setColumns(20);
+        jTPCompilado3.setRows(5);
+        jScrollPane5.setViewportView(jTPCompilado3);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -265,7 +278,9 @@ public class Principal extends javax.swing.JFrame {
                                 .addGap(43, 43, 43)
                                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 323, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(44, 44, 44)
-                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap(220, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -296,8 +311,11 @@ public class Principal extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 159, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(69, 69, 69)
+                                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(botonInermedio)
                     .addComponent(botonOptimizacion)
@@ -906,16 +924,273 @@ public class Principal extends javax.swing.JFrame {
             }
         }
         return false;
-
+    
     }//GEN-LAST:event_botonSemanticoMouseClicked
 
     private void botonInermedioMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonInermedioMouseClicked
         // TODO add your handling code here:
-        jTPCompilado.setText("Se realizara la generacion de codigo intermedio. ");
         botonOptimizacion.setEnabled(true);
         botonObjeto.setEnabled(false);
-    }//GEN-LAST:event_botonInermedioMouseClicked
 
+        String source = jTPFuente.getText();
+        if (source == null || source.trim().isEmpty()) {
+            jTPCompilado3.setText("No hay código fuente para generar código intermedio.");
+            labelMensaje.setText("ERROR: Código vacío");
+            return;
+        }
+
+        StringBuilder resultado = new StringBuilder();
+        resultado.append("=== GENERACIÓN DE CÓDIGO INTERMEDIO ===\n\n");
+
+        String[] lines = source.split("\\r?\\n");
+        int contadorExpresiones = 0;
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.isEmpty() || line.startsWith("//") || line.startsWith("package") || 
+                line.startsWith("import") || line.startsWith("func") || line.startsWith("fmt")) {
+                continue;
+            }
+
+            // Buscar asignaciones con expresiones matemáticas (incluye := y =)
+            if (line.matches(".*(?:=|:=).*[+\\-*/].*") && !line.contains("fmt.")) {
+                contadorExpresiones++;
+                
+                resultado.append("Expresión #").append(contadorExpresiones).append(" en línea ").append(i + 1).append(":\n");
+                resultado.append("Expresión original: ").append(line).append("\n");
+
+                try {
+                    // Extraer la expresión matemática
+                    String expresion = extraerExpresionMatematica(line);
+                    resultado.append("Expresión matemática: ").append(expresion).append("\n");
+
+                    // Validar expresión
+                    if (validarExpresion(expresion)) {
+                        resultado.append("\nExpresión válida\n");
+
+                        // Convertir a postfijo
+                        String postfijo = infijoAPostfijo(expresion);
+                        resultado.append("Notación postfija: ").append(postfijo).append("\n");
+
+                        // Generar cuádruplos
+                        resultado.append("\nCUÁDRUPLOS:\n");
+                        resultado.append("=================================================================\n");
+                        resultado.append(String.format("%-15s %-15s %-12s %-15s\n", 
+                            "Resultado", "Operando1", "Operador", "Operando2"));
+                        resultado.append("=================================================================\n");
+
+                        List<Cuadruplo> cuads = generarCuadruplos(expresion);
+                        for (Cuadruplo cuad : cuads) {
+                            resultado.append(String.format("%-25s %-25s %-25s %-25s\n", 
+                                cuad.resultado, 
+                                cuad.operando1, 
+                                cuad.operador, 
+                                cuad.operando2));
+                        }
+                        resultado.append("=================================================================\n");
+
+                        // Calcular resultado (usando valores por defecto para variables)
+                        double resultadoExpresion = evaluarExpresion(expresion);
+                        resultado.append("\nResultado de la expresión: ").append(resultadoExpresion).append("\n");
+
+                    } else {
+                        resultado.append("✗ Expresión inválida\n");
+                    }
+
+                } catch (Exception e) {
+                    resultado.append("✗ Error procesando expresión: ").append(e.getMessage()).append("\n");
+                    e.printStackTrace();
+                }
+
+                resultado.append("\n").append("-".repeat(50)).append("\n\n");
+            }
+        }
+
+        if (contadorExpresiones == 0) {
+            resultado.append("No se encontraron expresiones matemáticas para procesar.\n");
+            resultado.append("Las expresiones deben contener operadores +, -, *, / y asignación (= o :=)\n");
+        }
+
+        jTPCompilado3.setText(resultado.toString());
+        labelMensaje.setText("CÓDIGO INTERMEDIO GENERADO");
+    }//GEN-LAST:event_botonInermedioMouseClicked
+    
+    // ==================== CLASE AUXILIAR PARA CUÁDRUPLOS ====================
+    class Cuadruplo {
+        String resultado;
+        String operando1;
+        String operador;
+        String operando2;
+
+        Cuadruplo(String res, String op1, String op, String op2) {
+            resultado = res;
+            operando1 = op1;
+            operador = op;
+            operando2 = op2;
+        }
+    }
+
+    // ==================== MÉTODOS AUXILIARES ====================
+
+    private String extraerExpresionMatematica(String linea) {
+        // Eliminar punto y coma al final si existe
+        linea = linea.replace(";", "").trim();
+
+        // Buscar el operador de asignación (:= o =)
+        int indexAsignacion = -1;
+
+        // Primero buscar :=
+        indexAsignacion = linea.indexOf(":=");
+        if (indexAsignacion == -1) {
+            // Si no encuentra :=, buscar =
+            indexAsignacion = linea.indexOf("=");
+        }
+
+        if (indexAsignacion != -1) {
+            // Extraer la parte derecha de la asignación
+            String expresion = linea.substring(indexAsignacion + (linea.contains(":=") ? 2 : 1)).trim();
+            return expresion;
+        }
+
+        return linea; // Si no encuentra asignación, devolver la línea completa
+    }
+
+    private boolean validarExpresion(String expresion) {
+        if (expresion == null || expresion.trim().isEmpty()) {
+            return false;
+        }
+
+        // Verificar que tenga al menos un operador
+        boolean tieneOperador = false;
+        for (char c : expresion.toCharArray()) {
+            if (esOperador(c)) {
+                tieneOperador = true;
+                break;
+            }
+        }
+        if (!tieneOperador) return false;
+
+        // Verificar paréntesis balanceados
+        int balance = 0;
+        for (char c : expresion.toCharArray()) {
+            if (c == '(') balance++;
+            if (c == ')') balance--;
+            if (balance < 0) return false;
+        }
+        if (balance != 0) return false;
+
+        return true;
+    }
+
+    private boolean esOperador(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/';
+    }
+
+    private boolean esOperador(String s) {
+        return s.equals("+") || s.equals("-") || s.equals("*") || s.equals("/");
+    }
+
+    private int precedencia(char operador) {
+        switch (operador) {
+            case '+': case '-': return 1;
+            case '*': case '/': return 2;
+            default: return 0;
+        }
+    }
+
+    private String infijoAPostfijo(String expresion) {
+        StringBuilder postfijo = new StringBuilder();
+        Stack<Character> pila = new Stack<>();
+
+        for (int i = 0; i < expresion.length(); i++) {
+            char c = expresion.charAt(i);
+
+            if (Character.isWhitespace(c)) {
+                continue;
+            }
+
+            if (Character.isLetterOrDigit(c)) {
+                // Es un operando (número o variable)
+                StringBuilder operando = new StringBuilder();
+                while (i < expresion.length() && 
+                       (Character.isLetterOrDigit(expresion.charAt(i)) || 
+                        expresion.charAt(i) == '.' || expresion.charAt(i) == '_')) {
+                    operando.append(expresion.charAt(i));
+                    i++;
+                }
+                i--; // Retroceder porque el bucle principal avanzará
+                postfijo.append(operando).append(" ");
+            } else if (c == '(') {
+                pila.push(c);
+            } else if (c == ')') {
+                while (!pila.isEmpty() && pila.peek() != '(') {
+                    postfijo.append(pila.pop()).append(" ");
+                }
+                if (!pila.isEmpty() && pila.peek() == '(') {
+                    pila.pop(); // Sacar el '('
+                }
+            } else if (esOperador(c)) {
+                while (!pila.isEmpty() && pila.peek() != '(' && 
+                       precedencia(pila.peek()) >= precedencia(c)) {
+                    postfijo.append(pila.pop()).append(" ");
+                }
+                pila.push(c);
+            }
+        }
+
+        while (!pila.isEmpty()) {
+            postfijo.append(pila.pop()).append(" ");
+        }
+
+        return postfijo.toString().trim();
+    }
+
+    private List<Cuadruplo> generarCuadruplos(String expresion) {
+        List<Cuadruplo> cuads = new ArrayList<>();
+        Stack<String> pila = new Stack<>();
+        String postfijo = infijoAPostfijo(expresion);
+        String[] tokens = postfijo.split("\\s+");
+        int tempCount = 1;
+
+        for (String token : tokens) {
+            if (token.length() == 1 && esOperador(token.charAt(0))) {
+                // Es un operador
+                if (pila.size() < 2) {
+                    throw new RuntimeException("Expresión inválida: faltan operandos");
+                }
+                String op2 = pila.pop();
+                String op1 = pila.pop();
+                String temp = "t" + tempCount++;
+
+                Cuadruplo cuad = new Cuadruplo(temp, op1, token, op2);
+                cuads.add(cuad);
+                pila.push(temp);
+            } else {
+                // Es un operando
+                pila.push(token);
+            }
+        }
+
+        return cuads;
+    }
+
+    private double evaluarExpresion(String expresion) {
+        try {
+            // Reemplazar variables por valores por defecto para evaluación
+            String exprEval = expresion
+                .replaceAll("\\b[a-zA-Z_]\\w*\\b", "1") // Reemplazar variables por 1
+                .replaceAll("\\s+", ""); // Eliminar espacios
+
+            ScriptEngineManager manager = new ScriptEngineManager();
+            ScriptEngine engine = manager.getEngineByName("JavaScript");
+            Object result = engine.eval(exprEval);
+            return Double.parseDouble(result.toString());
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+    
+    
     private void botonOptimizacionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonOptimizacionMouseClicked
         // TODO add your handling code here:
         jTPCompilado.setText("Se realizara la Optimizacion de codigo. ");
@@ -977,7 +1252,7 @@ public class Principal extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Principal().setVisible(true);
-            }
+            } 
         });
     }
 
@@ -994,8 +1269,10 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTextArea jTPCompilado;
     private javax.swing.JTextArea jTPCompilado2;
+    private javax.swing.JTextArea jTPCompilado3;
     private javax.swing.JTextArea jTPFuente;
     private javax.swing.JTable jTable1;
     private javax.swing.JLabel label1;

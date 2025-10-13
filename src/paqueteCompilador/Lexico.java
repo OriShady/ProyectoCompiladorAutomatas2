@@ -10,7 +10,7 @@ package paqueteCompilador;
  */
 public class Lexico {
 
-    String lexema;
+    String lexema;   
     String nombre;
     int numero;
 
