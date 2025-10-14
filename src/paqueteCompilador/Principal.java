@@ -945,22 +945,27 @@ public class Principal extends javax.swing.JFrame {
         String[] lines = source.split("\\r?\\n");
         int contadorExpresiones = 0;
 
+        // 🧠 Mapa para guardar el valor de cada variable
+        Map<String, Double> variables = new HashMap<>();
+
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
-            if (line.isEmpty() || line.startsWith("//") || line.startsWith("package") || 
+            if (line.isEmpty() || line.startsWith("//") || line.startsWith("package") ||
                 line.startsWith("import") || line.startsWith("func") || line.startsWith("fmt")) {
                 continue;
             }
 
-            // Buscar asignaciones con expresiones matemáticas (incluye := y =)
+            // Buscar asignaciones con expresiones matemáticas
             if (line.matches(".*(?:=|:=).*[+\\-*/].*") && !line.contains("fmt.")) {
                 contadorExpresiones++;
-                
-                resultado.append("Expresión #").append(contadorExpresiones).append(" en línea ").append(i + 1).append(":\n");
+
+                resultado.append("Expresión #").append(contadorExpresiones)
+                        .append(" en línea ").append(i + 1).append(":\n");
                 resultado.append("Expresión original: ").append(line).append("\n");
 
                 try {
-                    // Extraer la expresión matemática
+                    // Extraer variable y expresión matemática
+                    String nombreVar = line.split(":=")[0].trim().replace("=", "").trim();
                     String expresion = extraerExpresionMatematica(line);
                     resultado.append("Expresión matemática: ").append(expresion).append("\n");
 
@@ -975,22 +980,21 @@ public class Principal extends javax.swing.JFrame {
                         // Generar cuádruplos
                         resultado.append("\nCUÁDRUPLOS:\n");
                         resultado.append("=================================================================\n");
-                        resultado.append(String.format("%-15s %-15s %-12s %-15s\n", 
+                        resultado.append(String.format("%-15s %-15s %-12s %-15s\n",
                             "Resultado", "Operando1", "Operador", "Operando2"));
                         resultado.append("=================================================================\n");
 
                         List<Cuadruplo> cuads = generarCuadruplos(expresion);
                         for (Cuadruplo cuad : cuads) {
-                            resultado.append(String.format("%-25s %-25s %-25s %-25s\n", 
-                                cuad.resultado, 
-                                cuad.operando1, 
-                                cuad.operador, 
-                                cuad.operando2));
+                            resultado.append(String.format("%-25s %-25s %-25s %-25s\n",
+                                cuad.resultado, cuad.operando1, cuad.operador, cuad.operando2));
                         }
                         resultado.append("=================================================================\n");
 
-                        // Calcular resultado (usando valores por defecto para variables)
-                        double resultadoExpresion = evaluarExpresion(expresion);
+                        // ⚙ Evaluar la expresión usando valores de variables previas
+                        double resultadoExpresion = evaluarExpresionConVariables(expresion, variables);
+                        variables.put(nombreVar, resultadoExpresion);
+
                         resultado.append("\nResultado de la expresión: ").append(resultadoExpresion).append("\n");
 
                     } else {
@@ -1014,6 +1018,38 @@ public class Principal extends javax.swing.JFrame {
         jTPCompilado3.setText(resultado.toString());
         labelMensaje.setText("CÓDIGO INTERMEDIO GENERADO");
     }//GEN-LAST:event_botonInermedioMouseClicked
+    
+    private double evaluarExpresionConVariables(String expresion, Map<String, Double> vars) {
+        try {
+            String postfijo = infijoAPostfijo(expresion);
+            String[] tokens = postfijo.split("\\s+");
+            Stack<Double> pila = new Stack<>();
+
+            for (String token : tokens) {
+                if (esOperador(token)) {
+                    double b = pila.pop();
+                    double a = pila.pop();
+                    switch (token) {
+                        case "+": pila.push(a + b); break;
+                        case "-": pila.push(a - b); break;
+                        case "*": pila.push(a * b); break;
+                        case "/": pila.push(a / b); break;
+                    }
+                } else {
+                    // Si es variable, usar valor previo o 1.0
+                    if (token.matches("[a-zA-Z_]\\w*")) {
+                        pila.push(vars.getOrDefault(token, 1.0));
+                    } else {
+                        pila.push(Double.parseDouble(token));
+                    }
+                }
+            }
+
+            return pila.pop();
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
     
     // ==================== CLASE AUXILIAR PARA CUÁDRUPLOS ====================
     class Cuadruplo {
@@ -1176,15 +1212,36 @@ public class Principal extends javax.swing.JFrame {
 
     private double evaluarExpresion(String expresion) {
         try {
-            // Reemplazar variables por valores por defecto para evaluación
-            String exprEval = expresion
-                .replaceAll("\\b[a-zA-Z_]\\w*\\b", "1") // Reemplazar variables por 1
-                .replaceAll("\\s+", ""); // Eliminar espacios
+            // Convertir a postfijo
+            String postfijo = infijoAPostfijo(expresion);
+            String[] tokens = postfijo.split("\\s+");
+            Stack<Double> pila = new Stack<>();
 
-            ScriptEngineManager manager = new ScriptEngineManager();
-            ScriptEngine engine = manager.getEngineByName("JavaScript");
-            Object result = engine.eval(exprEval);
-            return Double.parseDouble(result.toString());
+            for (String token : tokens) {
+                if (esOperador(token)) {
+                    if (pila.size() < 2) throw new RuntimeException("Expresión inválida");
+                    double b = pila.pop();
+                    double a = pila.pop();
+
+                    switch (token) {
+                        case "+": pila.push(a + b); break;
+                        case "-": pila.push(a - b); break;
+                        case "*": pila.push(a * b); break;
+                        case "/": pila.push(a / b); break;
+                    }
+                } else {
+                    // Si es variable, darle un valor por defecto
+                    if (token.matches("[a-zA-Z_]\\w*")) {
+                        pila.push(1.0);
+                    } else {
+                        pila.push(Double.parseDouble(token));
+                    }
+                }
+            }
+
+            if (pila.isEmpty()) return 0.0;
+            return pila.pop();
+
         } catch (Exception e) {
             return 0.0;
         }
