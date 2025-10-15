@@ -1,7 +1,54 @@
 package main
 
+import "fmt"
+
 func main() {
-    a := 1 + 2 * 3 - 4 / 2
-    b := (1 + 2) * (3 - 1)
-    c := a + b * 2 - 1
+    // Expresiones aritméticas básicas
+    a := 5
+    b := 3
+    c := 10
+    
+    // Expresión 1: Operaciones simples
+    resultado1 := a + b * c
+    resultado2 := (a + b) * c
+    
+    // Expresión 2: Con paréntesis y múltiples operaciones
+    d := a + b - c * 2 / 5
+    
+    // Expresión 3: Anidada
+    e := (a * b) + (c - a) / b
+    
+    // Expresión 4: Más compleja
+    f := a + b * c - d / e + 2
+    
+    // Expresión 5: Con constantes
+    g := 10 + 20 * 3 - 5
+    
+    // Mostrar resultados
+    fmt.Println("Resultado 1:", resultado1)
+    fmt.Println("Resultado 2:", resultado2)
+    fmt.Println("d:", d)
+    fmt.Println("e:", e)
+    fmt.Println("f:", f)
+    fmt.Println("g:", g)
+    
+    // Expresión 6: Con variables y constantes mezcladas
+    h := a + 15 * (b - 3)
+    
+    // Expresión 7: División y multiplicación
+    i := c / b * a + 7 - 2
+    
+    // Expresión 8: Múltiples niveles
+    j := ((a + b) * c - d) / e + f
+    
+    fmt.Println("h:", h)
+    fmt.Println("i:", i)
+    fmt.Println("j:", j)
+    
+    // Expresión 9: Asignación simple
+    k := a + b
+    
+    fmt.Println("k:", k)
+    fmt.Println("l:", l)
 }
+
