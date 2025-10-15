@@ -11,5 +11,6 @@ package paqueteCompilador;
 public class Clase {
     private String puebaGit;
     private String segunda_pruebaGit;
+    private String Clase;
     
 }
