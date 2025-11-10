@@ -1294,12 +1294,13 @@ public class Principal extends javax.swing.JFrame {
         // Iniciar medición de tiempo
         long inicio = System.currentTimeMillis();
 
-        // --- OPTIMIZACIÓN LOCAL: eliminar comentarios ---
+        // --- OPTIMIZACIÓN LOCAL: eliminar comentarios y líneas vacías ---
         String codigoSinComentarios = codigoFuente
                 .replaceAll("//.*", "") // comentarios de línea
-                .replaceAll("(?s)/\\*.*?\\*/", "");                  // comentarios de bloque
+                .replaceAll("(?s)/\\*.*?\\*/", "") // comentarios de bloque
+                .replaceAll("(?m)^\\s*$[\r\n]+", ""); // elimina líneas vacías o con solo espacios
 
-        // --- OPTIMIZACIÓN GLOBAL: variables constantes ---
+        // --- OPTIMIZACIÓN GLOBAL: detección de constantes ---
         Map<String, String> constantes = new HashMap<>();
 
         // Detecta constantes definidas con 'var x = valor' o 'x := valor'
@@ -1310,7 +1311,7 @@ public class Principal extends javax.swing.JFrame {
             String nombre = m.group(1);
             String valor = m.group(2);
 
-            // Solo agregar si no está reasignada después (muy simple pero útil)
+            // Solo agregar si no está reasignada después
             if (!constantes.containsKey(nombre)) {
                 constantes.put(nombre, valor);
             }
@@ -1332,7 +1333,20 @@ public class Principal extends javax.swing.JFrame {
         long tamOriginal = new java.io.File("original.txt").length();
         long tamOptimizado = new java.io.File("optimizado.txt").length();
 
-        // Mostrar resultados en una nueva ventana
+        // 🔄 Actualizar directamente el área de texto con el código optimizado
+        jTPFuente.setText(codigoOptimizado);
+
+        // Mostrar mensaje en la etiqueta y en el área de compilado
+        labelMensaje.setText("Código optimizado automáticamente. (" + tiempo + " ms)");
+        jTPCompilado.setText(
+                "=== OPTIMIZACIÓN COMPLETADA ===\n\n"
+                + "Tamaño original: " + tamOriginal + " bytes\n"
+                + "Tamaño optimizado: " + tamOptimizado + " bytes\n"
+                + "Tiempo: " + tiempo + " ms\n\n"
+                + "Código optimizado:\n\n" + codigoOptimizado
+        );
+
+        // 🪟 Mostrar también la ventana de optimización (manteniendo el comportamiento anterior)
         OptimizacionFrame frame = new OptimizacionFrame(
                 codigoOptimizado,
                 tiempo,
@@ -1341,6 +1355,7 @@ public class Principal extends javax.swing.JFrame {
         );
         frame.setVisible(true);
 
+        // Habilitar siguiente paso
         botonObjeto.setEnabled(true);
     }//GEN-LAST:event_botonOptimizacionMouseClicked
 

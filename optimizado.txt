@@ -1,56 +1,27 @@
 package main
-
 import "fmt"
-
 func main() {
-    
     5 := 5
     3 := 3
     10 := 10
-    
-    
-    5 := 5 + 3 * 10
+    resultado1 := 5 + 3 * 10
     resultado2 := (5 + 3) * 10
-    
-    
-    5 := 5 + 3 - 10 * 2 / 5
-    
-    
+    d := 5 + 3 - 10 * 2 / 5
     e := (5 * 3) + (10 - 5) / 3
-    
-    
-    5 := 5 + 3 * 10 - 5 / e + 2
-    
-    
+    f := 5 + 3 * 10 - d / e + 2
     10 := 10 + 20 * 3 - 5
-    
-    
-    fmt.Println("Resultado 1:", 5)
+    fmt.Println("Resultado 1:", resultado1)
     fmt.Println("Resultado 2:", resultado2)
-    fmt.Println("5:", 5)
+    fmt.Println("d:", d)
     fmt.Println("e:", e)
-    fmt.Println("5:", 5)
+    fmt.Println("f:", f)
     fmt.Println("10:", 10)
-    
-    
-    5 := 5 + 15 * (3 - 3)
-    
-    
-    10 := 10 / 3 * 5 + 7 - 2
-    
-    
-    j := ((5 + 3) * 10 - 5) / e + 5
-    
-    fmt.Println("5:", 5)
-    fmt.Println("10:", 10)
+    h := 5 + 15 * (3 - 3)
+    i := 10 / 3 * 5 + 7 - 2
+    j := ((5 + 3) * 10 - d) / e + f
+    fmt.Println("h:", h)
+    fmt.Println("i:", i)
     fmt.Println("j:", j)
-    
-    
-    5 := 5 + 3
-    
-    fmt.Println("5:", 5)
+    k := 5 + 3
+    fmt.Println("k:", k)
 }
-
-
-
-

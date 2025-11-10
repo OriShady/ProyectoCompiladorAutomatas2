@@ -47,6 +47,11 @@ public class PanelOptimizador extends javax.swing.JPanel {
         jScrollPane4.setViewportView(jTextArea2);
 
         btnOptimizar.setText("Optimizar Código");
+        btnOptimizar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOptimizarActionPerformed(evt);
+            }
+        });
 
         lblTiempo.setText("Tiempo: ");
 
@@ -117,6 +122,10 @@ public class PanelOptimizador extends javax.swing.JPanel {
     private void jTiempoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTiempoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTiempoActionPerformed
+
+    private void btnOptimizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOptimizarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnOptimizarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
