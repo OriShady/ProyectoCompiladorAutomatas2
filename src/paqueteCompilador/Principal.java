@@ -10,7 +10,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;    
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -924,7 +924,7 @@ public class Principal extends javax.swing.JFrame {
             }
         }
         return false;
-    
+
     }//GEN-LAST:event_botonSemanticoMouseClicked
 
     private void botonInermedioMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonInermedioMouseClicked
@@ -950,8 +950,8 @@ public class Principal extends javax.swing.JFrame {
 
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
-            if (line.isEmpty() || line.startsWith("//") || line.startsWith("package") ||
-                line.startsWith("import") || line.startsWith("func") || line.startsWith("fmt")) {
+            if (line.isEmpty() || line.startsWith("//") || line.startsWith("package")
+                    || line.startsWith("import") || line.startsWith("func") || line.startsWith("fmt")) {
                 continue;
             }
 
@@ -981,13 +981,13 @@ public class Principal extends javax.swing.JFrame {
                         resultado.append("\nCUÁDRUPLOS:\n");
                         resultado.append("=================================================================\n");
                         resultado.append(String.format("%-15s %-15s %-12s %-15s\n",
-                            "Resultado", "Operando1", "Operador", "Operando2"));
+                                "Resultado", "Operando1", "Operador", "Operando2"));
                         resultado.append("=================================================================\n");
 
                         List<Cuadruplo> cuads = generarCuadruplos(expresion);
                         for (Cuadruplo cuad : cuads) {
                             resultado.append(String.format("%-25s %-25s %-25s %-25s\n",
-                                cuad.resultado, cuad.operando1, cuad.operador, cuad.operando2));
+                                    cuad.resultado, cuad.operando1, cuad.operador, cuad.operando2));
                         }
                         resultado.append("=================================================================\n");
 
@@ -1018,7 +1018,7 @@ public class Principal extends javax.swing.JFrame {
         jTPCompilado3.setText(resultado.toString());
         labelMensaje.setText("CÓDIGO INTERMEDIO GENERADO");
     }//GEN-LAST:event_botonInermedioMouseClicked
-    
+
     private double evaluarExpresionConVariables(String expresion, Map<String, Double> vars) {
         try {
             String postfijo = infijoAPostfijo(expresion);
@@ -1030,10 +1030,18 @@ public class Principal extends javax.swing.JFrame {
                     double b = pila.pop();
                     double a = pila.pop();
                     switch (token) {
-                        case "+": pila.push(a + b); break;
-                        case "-": pila.push(a - b); break;
-                        case "*": pila.push(a * b); break;
-                        case "/": pila.push(a / b); break;
+                        case "+":
+                            pila.push(a + b);
+                            break;
+                        case "-":
+                            pila.push(a - b);
+                            break;
+                        case "*":
+                            pila.push(a * b);
+                            break;
+                        case "/":
+                            pila.push(a / b);
+                            break;
                     }
                 } else {
                     // Si es variable, usar valor previo o 1.0
@@ -1050,9 +1058,10 @@ public class Principal extends javax.swing.JFrame {
             return 0.0;
         }
     }
-    
+
     // ==================== CLASE AUXILIAR PARA CUÁDRUPLOS ====================
     class Cuadruplo {
+
         String resultado;
         String operando1;
         String operador;
@@ -1067,7 +1076,6 @@ public class Principal extends javax.swing.JFrame {
     }
 
     // ==================== MÉTODOS AUXILIARES ====================
-
     private String extraerExpresionMatematica(String linea) {
         // Eliminar punto y coma al final si existe
         linea = linea.replace(";", "").trim();
@@ -1104,16 +1112,26 @@ public class Principal extends javax.swing.JFrame {
                 break;
             }
         }
-        if (!tieneOperador) return false;
+        if (!tieneOperador) {
+            return false;
+        }
 
         // Verificar paréntesis balanceados
         int balance = 0;
         for (char c : expresion.toCharArray()) {
-            if (c == '(') balance++;
-            if (c == ')') balance--;
-            if (balance < 0) return false;
+            if (c == '(') {
+                balance++;
+            }
+            if (c == ')') {
+                balance--;
+            }
+            if (balance < 0) {
+                return false;
+            }
         }
-        if (balance != 0) return false;
+        if (balance != 0) {
+            return false;
+        }
 
         return true;
     }
@@ -1128,9 +1146,14 @@ public class Principal extends javax.swing.JFrame {
 
     private int precedencia(char operador) {
         switch (operador) {
-            case '+': case '-': return 1;
-            case '*': case '/': return 2;
-            default: return 0;
+            case '+':
+            case '-':
+                return 1;
+            case '*':
+            case '/':
+                return 2;
+            default:
+                return 0;
         }
     }
 
@@ -1148,9 +1171,9 @@ public class Principal extends javax.swing.JFrame {
             if (Character.isLetterOrDigit(c)) {
                 // Es un operando (número o variable)
                 StringBuilder operando = new StringBuilder();
-                while (i < expresion.length() && 
-                       (Character.isLetterOrDigit(expresion.charAt(i)) || 
-                        expresion.charAt(i) == '.' || expresion.charAt(i) == '_')) {
+                while (i < expresion.length()
+                        && (Character.isLetterOrDigit(expresion.charAt(i))
+                        || expresion.charAt(i) == '.' || expresion.charAt(i) == '_')) {
                     operando.append(expresion.charAt(i));
                     i++;
                 }
@@ -1166,8 +1189,8 @@ public class Principal extends javax.swing.JFrame {
                     pila.pop(); // Sacar el '('
                 }
             } else if (esOperador(c)) {
-                while (!pila.isEmpty() && pila.peek() != '(' && 
-                       precedencia(pila.peek()) >= precedencia(c)) {
+                while (!pila.isEmpty() && pila.peek() != '('
+                        && precedencia(pila.peek()) >= precedencia(c)) {
                     postfijo.append(pila.pop()).append(" ");
                 }
                 pila.push(c);
@@ -1219,15 +1242,25 @@ public class Principal extends javax.swing.JFrame {
 
             for (String token : tokens) {
                 if (esOperador(token)) {
-                    if (pila.size() < 2) throw new RuntimeException("Expresión inválida");
+                    if (pila.size() < 2) {
+                        throw new RuntimeException("Expresión inválida");
+                    }
                     double b = pila.pop();
                     double a = pila.pop();
 
                     switch (token) {
-                        case "+": pila.push(a + b); break;
-                        case "-": pila.push(a - b); break;
-                        case "*": pila.push(a * b); break;
-                        case "/": pila.push(a / b); break;
+                        case "+":
+                            pila.push(a + b);
+                            break;
+                        case "-":
+                            pila.push(a - b);
+                            break;
+                        case "*":
+                            pila.push(a * b);
+                            break;
+                        case "/":
+                            pila.push(a / b);
+                            break;
                     }
                 } else {
                     // Si es variable, darle un valor por defecto
@@ -1239,18 +1272,75 @@ public class Principal extends javax.swing.JFrame {
                 }
             }
 
-            if (pila.isEmpty()) return 0.0;
+            if (pila.isEmpty()) {
+                return 0.0;
+            }
             return pila.pop();
 
         } catch (Exception e) {
             return 0.0;
         }
     }
-    
-    
+
+
     private void botonOptimizacionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonOptimizacionMouseClicked
         // TODO add your handling code here:
-        jTPCompilado.setText("Se realizara la Optimizacion de codigo. ");
+        String codigoFuente = jTPFuente.getText();
+        if (codigoFuente.trim().isEmpty()) {
+            jTPCompilado.setText("No hay código fuente para optimizar.");
+            return;
+        }
+
+        // Iniciar medición de tiempo
+        long inicio = System.currentTimeMillis();
+
+        // --- OPTIMIZACIÓN LOCAL: eliminar comentarios ---
+        String codigoSinComentarios = codigoFuente
+                .replaceAll("//.*", "") // comentarios de línea
+                .replaceAll("(?s)/\\*.*?\\*/", "");                  // comentarios de bloque
+
+        // --- OPTIMIZACIÓN GLOBAL: variables constantes ---
+        Map<String, String> constantes = new HashMap<>();
+
+        // Detecta constantes definidas con 'var x = valor' o 'x := valor'
+        Pattern pConst = Pattern.compile("\\b(?:var\\s+)?(\\w+)\\s*:?=\\s*([0-9]+|\"[^\"]*\")\\s*");
+        Matcher m = pConst.matcher(codigoSinComentarios);
+
+        while (m.find()) {
+            String nombre = m.group(1);
+            String valor = m.group(2);
+
+            // Solo agregar si no está reasignada después (muy simple pero útil)
+            if (!constantes.containsKey(nombre)) {
+                constantes.put(nombre, valor);
+            }
+        }
+
+        // Reemplazar cada constante por su valor
+        String codigoOptimizado = codigoSinComentarios;
+        for (Map.Entry<String, String> entry : constantes.entrySet()) {
+            codigoOptimizado = codigoOptimizado.replaceAll("\\b" + entry.getKey() + "\\b", entry.getValue());
+        }
+
+        long fin = System.currentTimeMillis();
+        long tiempo = fin - inicio;
+
+        // Guardar archivos para comparar tamaño
+        ManejoDeArchivos.guardarArchivoTexto("original.txt", codigoFuente);
+        ManejoDeArchivos.guardarArchivoTexto("optimizado.txt", codigoOptimizado);
+
+        long tamOriginal = new java.io.File("original.txt").length();
+        long tamOptimizado = new java.io.File("optimizado.txt").length();
+
+        // Mostrar resultados en una nueva ventana
+        OptimizacionFrame frame = new OptimizacionFrame(
+                codigoOptimizado,
+                tiempo,
+                tamOriginal,
+                tamOptimizado
+        );
+        frame.setVisible(true);
+
         botonObjeto.setEnabled(true);
     }//GEN-LAST:event_botonOptimizacionMouseClicked
 
@@ -1309,7 +1399,7 @@ public class Principal extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Principal().setVisible(true);
-            } 
+            }
         });
     }
 

@@ -49,7 +49,7 @@ func main() {
     k := a + b
     
     fmt.Println("k:", k)
-    fmt.Println("l:", l)
 }
+
 
 

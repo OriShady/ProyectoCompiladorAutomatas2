@@ -83,4 +83,13 @@ public class ManejoDeArchivos {
 
         return cadena;
     }
+    
+    public static void guardarArchivoTexto(String nombreArchivo, String contenido) {
+    try (java.io.FileWriter fw = new java.io.FileWriter(nombreArchivo)) {
+        fw.write(contenido);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
 }
